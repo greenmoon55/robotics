@@ -19,6 +19,17 @@ grid = [[0, 1, 0, 0, 0, 0],
         [0, 1, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0]]
 
+grid = [[0 for col in range(100)] for row in range(100)]
+for i in range(80):
+    grid[i][10] = 1
+    grid[len(grid) - 1 - i][80] = 1
+
+
+def print_matrix(m):
+    for l in m:
+        print l
+
+
 heuristic = []
 prev = [[None for col in range(len(grid[0]))] for row in range(len(grid))]
 
@@ -53,7 +64,7 @@ def search(grid, init, goal, cost, heuristic):
     closed[init[0]][init[1]] = 1
 
     expand = [[-1 for col in range(len(grid[0]))] for row in range(len(grid))]
-    action = [[-1 for col in range(len(grid[0]))] for row in range(len(grid))]
+    policy = [[-1 for col in range(len(grid[0]))] for row in range(len(grid))]
 
     x = init[0]
     y = init[1]
@@ -95,6 +106,14 @@ def search(grid, init, goal, cost, heuristic):
                             open.append([f2, g2, h2, x2, y2])
                             closed[x2][y2] = 1
                             prev[x2][y2] = [x, y]
+                            policy[x][y] = delta_name[i]
+
+    current = goal
+    ans = [[0 for col in range(len(grid[0]))] for row in range(len(grid))]
+    while current != init:
+        ans[current[0]][current[1]] = 1
+        current = prev[current[0]][current[1]]
+    print_matrix(ans)
     return expand
 
 if __name__ == "__main__":
@@ -107,7 +126,7 @@ if __name__ == "__main__":
     paths = []
     for i in range(len(grid)):
         for j in range(len(grid[0])):
-            print i, j, res[i][j]
+            # print i, j, res[i][j]
             if res[i][j] != -1:
                 path = []
                 x, y = i, j
@@ -117,6 +136,6 @@ if __name__ == "__main__":
                     ny = prev[x][y][1]
                     x, y = nx, ny
                 paths.append(path)
-    for p in paths:
-        print p
+    # for p in paths:
+    #     print p
 
