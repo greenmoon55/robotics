@@ -13,28 +13,31 @@
 # the function should return the string 'fail'
 # ----------
 
-grid = [[0, 1, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0]]
+grid = [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]]
 
-grid = [[0 for col in range(100)] for row in range(100)]
-for i in range(80):
-    grid[i][10] = 1
-    grid[len(grid) - 1 - i][80] = 1
-
-
-def print_matrix(m):
-    for l in m:
-        print l
+# grid = [[0 for col in range(100)] for row in range(100)]
+# for i in range(80):
+#     grid[i][10] = 1
+#     grid[len(grid) - 1 - i][80] = 1
 
 
 heuristic = []
+heuristic_theta = [[[2147483647 for col in range(8)] for col in range(len(grid[0]))] for row in range(len(grid))]
 prev = [[None for col in range(len(grid[0]))] for row in range(len(grid))]
+history = [[[None for col in range(10)] for col in range(len(grid[0]))] for row in range(len(grid))]
 
 init = [0, 0]
 goal = [len(grid) - 1, len(grid[0]) - 1]
+goal_theta = [len(grid) - 1, len(grid[0]) - 1, 4]
 cost = 1
 
 delta = [[-1, 0],  # go up
@@ -43,6 +46,15 @@ delta = [[-1, 0],  # go up
          [0, 1]]  # go right
 
 delta_name = ['^', '<', 'v', '>']
+
+eight_delta = [[-1, 0], [-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, -1]]
+theta_delta = [-1, 0, 1]
+cost_delta = [1.5, 1, 1.5]
+
+
+def print_matrix(m):
+    for l in m:
+        print l
 
 
 def generate_heuristic(grid, goal):
@@ -54,6 +66,30 @@ def generate_heuristic(grid, goal):
             heuristic[x][y] = abs(goal[0] - x) + abs(goal[1] - y)
 
     return heuristic
+
+
+def generate_heuristic_theta():
+    x, y, z = goal_theta
+    heuristic_theta[x][y][z] = 0
+    open = [[x, y, z, 0]]
+
+    while open:
+        print len(open)
+        next = open.pop()
+        x, y, z, cost = next
+        if cost > heuristic_theta[x][y][z]:
+            continue
+        for i in range(len(theta_delta)):
+            z2 = (z + theta_delta[i]) % 8
+            x2 = x - eight_delta[z2][0]
+            y2 = y - eight_delta[z2][1]
+            if x2 >= 0 and x2 < len(grid) and y2 >= 0 and y2 < len(grid[0]):
+
+                cost2 = cost + cost_delta[i]
+                if cost2 < heuristic_theta[x2][y2][z2]:
+                    heuristic_theta[x2][y2][z2] = cost2
+                    open.append([x2, y2, z2, cost2])
+                    history[x2][y2][z2] = (x, y, z)
 
 
 def search(grid, init, goal, cost, heuristic):
@@ -117,7 +153,14 @@ def search(grid, init, goal, cost, heuristic):
     return expand
 
 if __name__ == "__main__":
+    generate_heuristic_theta()
     heuristic = generate_heuristic(grid, goal)
+
+    a, b, c = 8, 9, 0
+    while history[a][b][c]:
+        print a, b, c
+        a, b, c = history[a][b][c]
+
     res = search(grid, init, goal, cost, heuristic)
     for r in res:
         print r
